@@ -60,6 +60,15 @@ namespace AdventOfCode2019.Tests
             var output = Des05.First(_input, input);
             _testOutputHelper.WriteLine(string.Join(",", output.Select(x => x.ToString())));
         }
+
+        [Fact]
+        public void Second()
+        {
+            var input = 5;
+
+            var output = Des05.Second(_input, input);
+            _testOutputHelper.WriteLine(string.Join(",", output.Select(x => x.ToString())));
+        }
         
         [Theory]
         [InlineData(1, typeof(Add))]
@@ -99,6 +108,23 @@ namespace AdventOfCode2019.Tests
             var list = new List<int>() {3, 0, 4, 0, 99};
             var output = Des05.First(list, 42);
             _testOutputHelper.WriteLine(string.Join(",", output.Select(x => x.ToString())));
+        }
+
+        [Theory]
+        [InlineData(5, 999)]
+        [InlineData(8, 1000)]
+        [InlineData(9, 1001)]
+        public void Instruction_With_Jumps_Work_Correctly(int input, int expected)
+        {
+            var list = new List<int>()
+            {
+                3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31,
+                1106, 0, 36, 98, 0, 0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104,
+                999, 1105, 1, 46, 1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99
+            };
+
+            var output = Des05.Second(list, input).Last();
+            Assert.Equal(expected, output);
         }
     }
 }

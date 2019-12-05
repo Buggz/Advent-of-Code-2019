@@ -7,7 +7,6 @@ namespace AdventOfCode2019._04
     public class Password
     {
         private readonly int _input;
-        private bool _containsDoubleDigit = false;
         private Dictionary<int, int> _repeatedDigits = new Dictionary<int, int>();
 
         public Password(int input)
