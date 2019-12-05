@@ -126,5 +126,16 @@ namespace AdventOfCode2019.Tests
             var output = Des05.Second(list, input).Last();
             Assert.Equal(expected, output);
         }
+
+        [Fact]
+        public void Test()
+        {
+            var list = new List<int> { 3,9,8,9,10,9,4,9,99,-1,8 };
+            var output = Des05.Second(list, 8).Last();
+            Assert.Equal(1, output);
+            
+            output = Des05.Second(list, 9).Last();
+            Assert.Equal(0, output);
+        }
     }
 }
