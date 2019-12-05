@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
-using System.Reflection;
 
 namespace AdventOfCode2019._05
 {
@@ -36,7 +34,7 @@ namespace AdventOfCode2019._05
     public abstract class Instruction
     {
         public List<Parameter> Parameters { get; }
-        private int Opcode { get; }
+        private int OpCode;
         public abstract int ParameterCount { get; }
         public abstract void Run();
 
@@ -44,7 +42,7 @@ namespace AdventOfCode2019._05
         {
             Parameters = list.Skip(1).Take(ParameterCount).Select(x => new Parameter(){Value = x}).ToList();
             var opCode = list.First();
-            Opcode = opCode % 10;
+            OpCode = opCode % 10;
 
             if (((opCode % 1000) / 100) > 0)
                 Parameters[0].Mode = Modes.Immediate;
@@ -59,7 +57,11 @@ namespace AdventOfCode2019._05
             {1, Add.Create },
             {2, Multiply.Create },
             {3, SaveValue.Create },
-            {4, OutputValue.Create }
+            {4, OutputValue.Create },
+            {5, JumpIfTrue.Create },
+            {6, JumpIfFalse.Create },
+            {7, LessThan.Create },
+            {8, Equal.Create },
         };
         
         public static Instruction Parse(List<int> list)
@@ -156,6 +158,131 @@ namespace AdventOfCode2019._05
         public override void Run()
         {
             Globals.Output.Add(Parameters[0].GetValue());
+        }
+    }
+
+    public class JumpIfTrue : Instruction, IMayJump
+    {
+        private int _jumpTo;
+        private bool _shouldJump;
+        private JumpIfTrue(List<int> list) : base(list)
+        {
+        }
+
+        public override int ParameterCount { get; } = 2;
+        public override void Run()
+        {
+            if (Parameters[0].GetValue() != 0)
+            {
+                _jumpTo = Parameters[1].GetValue();
+                _shouldJump = true;
+            }
+        }
+
+        int IMayJump.JumpTo()
+        {
+            return _jumpTo;
+        }
+
+        bool IMayJump.ShouldJump()
+        {
+            return _shouldJump;
+        }
+
+        public static Instruction Create(List<int> list)
+        {
+            return new JumpIfTrue(list);
+        }
+    }
+
+    public interface IMayJump
+    {
+        int JumpTo();
+        bool ShouldJump();
+    }
+
+    public class JumpIfFalse : Instruction, IMayJump
+    {
+        private int _jumpTo;
+        private bool _shouldJump;
+        
+        private JumpIfFalse(List<int> list) : base(list)
+        {
+        }
+
+        public override int ParameterCount { get; } = 2;
+        public override void Run()
+        {
+            if (Parameters[0].GetValue() == 0)
+            {
+                _jumpTo = Parameters[1].GetValue();
+                _shouldJump = true;
+            }
+        }
+
+        public int JumpTo()
+        {
+            return _jumpTo;
+        }
+
+        public bool ShouldJump()
+        {
+            return _shouldJump;
+        }
+
+        public static Instruction Create(List<int> list)
+        {
+            return new JumpIfFalse(list);
+        }
+    }
+    
+    public class LessThan : Instruction
+    {
+        private LessThan(List<int> list) : base(list)
+        {
+        }
+
+        public override int ParameterCount { get; } = 3;
+        public override void Run()
+        {
+            var value = 0;
+            if (Parameters[0].GetValue() < Parameters[1].GetValue())
+            {
+                value = 1;
+            }
+
+            var index = Parameters[2].Value;
+            Globals.List[index] = value;
+        }
+
+        public static Instruction Create(List<int> list)
+        {
+            return new LessThan(list);
+        }
+    }
+
+    public class Equal : Instruction
+    {
+        private Equal(List<int> list) : base(list)
+        {
+        }
+
+        public override int ParameterCount { get; } = 3;
+        public override void Run()
+        {
+            int value = 0;
+            if (Parameters[0].GetValue() == Parameters[1].GetValue())
+            {
+                value = 1;
+            }
+
+            var index = Parameters[2].Value;
+            Globals.List[index] = value;
+        }
+
+        public static Instruction Create(List<int> list)
+        {
+            return new Equal(list);
         }
     }
 }
