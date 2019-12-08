@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using AdventOfCode2019._05;
+using AdventOfCode2019._07;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -58,7 +59,7 @@ namespace AdventOfCode2019.Tests
             var input = 1;
 
             var output = Des05.First(_input, input);
-            _testOutputHelper.WriteLine(string.Join(",", output.Select(x => x.ToString())));
+            _testOutputHelper.WriteLine(output.ToString());
         }
 
         [Fact]
@@ -102,12 +103,13 @@ namespace AdventOfCode2019.Tests
             Assert.Equal(expectedMode2, actual.Parameters[1].Mode);
         }
 
+       
         [Fact]
         public void Instruction_Performs_Correctly()
         {
             var list = new List<int>() {3, 0, 4, 0, 99};
             var output = Des05.First(list, 42);
-            _testOutputHelper.WriteLine(string.Join(",", output.Select(x => x.ToString())));
+            _testOutputHelper.WriteLine(output.ToString());
         }
 
         [Theory]
@@ -123,7 +125,7 @@ namespace AdventOfCode2019.Tests
                 999, 1105, 1, 46, 1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99
             };
 
-            var output = Des05.Second(list, input).Last();
+            var output = new OpCodeInterpreter(list.ToArray()).Run(input);
             Assert.Equal(expected, output);
         }
 

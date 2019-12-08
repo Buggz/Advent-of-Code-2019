@@ -20,15 +20,39 @@ namespace AdventOfCode2019._05
             if (Mode == Modes.Immediate)
                 return Value;
 
-            return Globals.List[Value];
+            return IntcodeGlobals.List[Value];
         }
     }
 
-    public static class Globals
+    public static class IntcodeGlobals
     {
+        private static int _timesAccessedInput = 0;
+        
         public static List<int> List;
-        public static int Input;
+
+        public static int Input
+        {
+            get
+            {
+                if (PhaseSetting != null && _timesAccessedInput == 0)
+                {
+                    _timesAccessedInput++;
+                    return PhaseSetting.Value;
+                }
+
+                _timesAccessedInput++;
+                return _input;
+            }
+            set
+            {
+                _input = value;
+                _timesAccessedInput = 0;
+            }
+        }
+
+        public static int? PhaseSetting;
         public static List<int> Output = new List<int>();
+        private static int _input;
     }
     
     public abstract class Instruction
@@ -106,7 +130,7 @@ namespace AdventOfCode2019._05
         public override void Run()
         {
             var index = Parameters[2].Value;
-            Globals.List[index] = Parameters[0].GetValue() + Parameters[1].GetValue();
+            IntcodeGlobals.List[index] = Parameters[0].GetValue() + Parameters[1].GetValue();
         }
     }
     
@@ -124,7 +148,7 @@ namespace AdventOfCode2019._05
         public override void Run()
         {
             var index = Parameters[2].Value;
-            Globals.List[index] = Parameters[0].GetValue() * Parameters[1].GetValue();
+            IntcodeGlobals.List[index] = Parameters[0].GetValue() * Parameters[1].GetValue();
         }
     }
 
@@ -141,7 +165,7 @@ namespace AdventOfCode2019._05
         public override void Run()
         {
             var index = Parameters[0].Value;
-            Globals.List[index] = Globals.Input;
+            IntcodeGlobals.List[index] = IntcodeGlobals.Input;
         }
     }
 
@@ -157,7 +181,7 @@ namespace AdventOfCode2019._05
 
         public override void Run()
         {
-            Globals.Output.Add(Parameters[0].GetValue());
+            IntcodeGlobals.Output.Add(Parameters[0].GetValue());
         }
     }
 
@@ -252,7 +276,7 @@ namespace AdventOfCode2019._05
             }
 
             var index = Parameters[2].Value;
-            Globals.List[index] = value;
+            IntcodeGlobals.List[index] = value;
         }
 
         public static Instruction Create(List<int> list)
@@ -277,7 +301,7 @@ namespace AdventOfCode2019._05
             }
 
             var index = Parameters[2].Value;
-            Globals.List[index] = value;
+            IntcodeGlobals.List[index] = value;
         }
 
         public static Instruction Create(List<int> list)

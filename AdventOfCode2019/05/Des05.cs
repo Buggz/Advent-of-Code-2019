@@ -1,45 +1,34 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AdventOfCode2019._07;
 
 namespace AdventOfCode2019._05
 {
     public class Des05
     {
-        public static List<int> First(List<int> list, int input)
+        public static int First(List<int> list, int input)
         {
-            Globals.List = list;
-            Globals.Input = input;
-            
-            for (var i = 0; i < list.Count;)
-            {
-                try
-                {
-                    var instruction = Instruction.Parse(Globals.List.Skip(i).ToList());
-                    if (instruction is Halt)
-                        break;
-                    instruction.Run();
-                    i += instruction.ParameterCount + 1;
-                }
-                catch (Exception e)
-                {
-                    throw;
-                }
-            }
-            
-            return Globals.Output;
+            return new OpCodeInterpreter(list.ToArray()).Run(input);
         }
-
+        
         public static List<int> Second(List<int> list, int input)
         {
-            Globals.List = list;
-            Globals.Input = input;
+            return RunOpcodes(list, input);
+        }
+        
+        public static List<int> RunOpcodes(List<int> list, int input, int? phaseSetting = null)
+        {
+            IntcodeGlobals.List = list;
+            IntcodeGlobals.Input = input;
+            IntcodeGlobals.PhaseSetting = phaseSetting;
+            IntcodeGlobals.Output.Clear();
             
             for (var i = 0; i < list.Count;)
             {
                 try
                 {
-                    var instruction = Instruction.Parse(Globals.List.Skip(i).ToList());
+                    var instruction = Instruction.Parse(IntcodeGlobals.List.Skip(i).ToList());
                     if (instruction is Halt)
                         break;
                     instruction.Run();
@@ -56,7 +45,7 @@ namespace AdventOfCode2019._05
                 }
             }
             
-            return Globals.Output;
+            return IntcodeGlobals.Output;
         }
     }
 }
