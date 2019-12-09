@@ -1,22 +1,25 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AdventOfCode2019._07
 {
     public class OpCodeInterpreter
     {
-        private readonly Action<int> _output;
         private List<int> _program;
-        private int _lastOutput;
-        private int _input;
+        public int LastOutput;
+        public int? Input;
         private int? _phase;
         private int _timesAccessedInput;
 
-        public OpCodeInterpreter(int[] program, Action<int> output = null)
+        private int _idx;
+
+        public OpCodeInterpreter(int[] program, int? input = null, int? phase = null)
         {
-            _output = output;
+            Input = input;
             _program = program.ToList();
+            _phase = phase;
         }
 
         private int GetInput()
@@ -24,7 +27,14 @@ namespace AdventOfCode2019._07
             if (_phase.HasValue && _timesAccessedInput++ == 0)
                 return _phase.Value;
 
-            return _input;
+            var val = Input.Value;
+            Input = null;
+            return val;
+        }
+
+        private bool CanGetInput()
+        {
+            return _timesAccessedInput == 0 || Input.HasValue;
         }
 
         public enum Instructions
@@ -48,77 +58,76 @@ namespace AdventOfCode2019._07
             return _program[_program[value]];
         }
 
-        public int Run(int input, int? phase = null)
+        public bool Run()
         {
-            _input = input;
-            _phase = phase;
-            
-            for (var i = 0;;)
+            while (true)
             {
-                var instruction = (Instructions)(_program[i] % 100);
-                var modes = GetModes(_program[i]);
+                var instruction = (Instructions)(_program[_idx] % 100);
+                var modes = GetModes(_program[_idx]);
                 switch (instruction)
                 {
                     case Instructions.Add:
-                        _program[_program[i + 3]] = GetValue(i + 1, modes[0]) + GetValue(i + 2, modes[1]);
-                        i += 4;
+                        _program[_program[_idx + 3]] = GetValue(_idx + 1, modes[0]) + GetValue(_idx + 2, modes[1]);
+                        _idx += 4;
                         break;
                     
                     case Instructions.Multiply:
-                        _program[_program[i + 3]] = GetValue(i + 1, modes[0]) * GetValue(i + 2, modes[1]);
-                        i += 4;
+                        _program[_program[_idx + 3]] = GetValue(_idx + 1, modes[0]) * GetValue(_idx + 2, modes[1]);
+                        _idx += 4;
                         break;
                     
                     case Instructions.Input:
-                        _program[_program[i + 1]] = GetInput();
-                        i += 2;
+                        if (!CanGetInput())
+                            return false;
+                        _program[_program[_idx + 1]] = GetInput();
+                        _idx += 2;
                         break;
                         
                     case Instructions.Output:
-                        _lastOutput = GetValue(i + 1, modes[0]);
-                        i += 2;
+                        LastOutput = GetValue(_idx + 1, modes[0]);
+                        _idx += 2;
                         break;
                     
                     case Instructions.JIT:
-                        if (GetValue(i + 1, modes[0]) != 0)
+                        if (GetValue(_idx + 1, modes[0]) != 0)
                         {
-                            i = GetValue(i + 2, modes[1]);
+                            _idx = GetValue(_idx + 2, modes[1]);
                         }
                         else
                         {
-                            i += 3;
+                            _idx += 3;
                         }
                         break;
                     
                     case Instructions.JIF:
-                        if (GetValue(i + 1, modes[0]) == 0)
+                        if (GetValue(_idx + 1, modes[0]) == 0)
                         {
-                            i = GetValue(i + 2, modes[1]);
+                            _idx = GetValue(_idx + 2, modes[1]);
                         }
                         else
                         {
-                            i += 3;
+                            _idx += 3;
                         }
                         break;
                     
                     case Instructions.LT:
-                        if (GetValue(i + 1, modes[0]) < GetValue(i + 2, modes[1]))
-                            _program[_program[i + 3]] = 1;
+                        if (GetValue(_idx + 1, modes[0]) < GetValue(_idx + 2, modes[1]))
+                            _program[_program[_idx + 3]] = 1;
                         else
-                            _program[_program[i + 3]] = 0;
-                        i += 4;
+                            _program[_program[_idx + 3]] = 0;
+                        _idx += 4;
                         break;
                     
                     case Instructions.EQ:
-                        if (GetValue(i + 1, modes[0]) == GetValue(i + 2, modes[1]))
-                            _program[_program[i + 3]] = 1;
+                        if (GetValue(_idx + 1, modes[0]) == GetValue(_idx + 2, modes[1]))
+                            _program[_program[_idx + 3]] = 1;
                         else
-                            _program[_program[i + 3]] = 0;
-                        i += 4;
+                            _program[_program[_idx + 3]] = 0;
+                        _idx += 4;
                         break;
                     
                     case Instructions.HALT:
-                        return _lastOutput;
+                        return true;
                 }
             }
         }

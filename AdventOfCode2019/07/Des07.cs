@@ -19,13 +19,53 @@ namespace AdventOfCode2019._07
             return results.Max();
         }
 
+        public static int Second(int[] opcodeProgram)
+        {
+            var results = new List<int>();
+
+            foreach (var permutation in Permutations)
+            {
+                results.Add(RunIntCodeComputerFeedback(opcodeProgram, permutation));
+            }
+
+            return results.Max();
+        }
+
+        private static int RunIntCodeComputerFeedback(int[] opcodeProgram, int[] permutation)
+        {
+            int output = 0;
+            var cpus = new[]
+            {
+                new OpCodeInterpreter(opcodeProgram, phase: permutation[0] + 4),
+                new OpCodeInterpreter(opcodeProgram, phase: permutation[1] + 4),
+                new OpCodeInterpreter(opcodeProgram, phase: permutation[2] + 4),
+                new OpCodeInterpreter(opcodeProgram, phase: permutation[3] + 4),
+                new OpCodeInterpreter(opcodeProgram, phase: permutation[4] + 4)
+            };
+
+
+            for (var i = 0; i < permutation.Length; i = (i + 1) % 5 )
+            {
+                cpus[i].Input = output;
+                var halted = cpus[i].Run();
+                output = cpus[i].LastOutput;
+                
+                if (halted && i == 4)
+                    break;
+            }
+
+            return output;
+        }
+
         public static int RunIntCodeComputer(int[] opcodeProgram, int[] permutation)
         {
             int output = 0;
             
             for (var i = 0; i < permutation.Length; i++)
             {
-                output = new OpCodeInterpreter(opcodeProgram).Run(output, permutation[i] - 1); 
+                var cpu = new OpCodeInterpreter(opcodeProgram, output, permutation[i] - 1);
+                cpu.Run();
+                output = cpu.LastOutput;
             }
 
             return output;

@@ -125,8 +125,9 @@ namespace AdventOfCode2019.Tests
                 999, 1105, 1, 46, 1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99
             };
 
-            var output = new OpCodeInterpreter(list.ToArray()).Run(input);
-            Assert.Equal(expected, output);
+            var cpu = new OpCodeInterpreter(list.ToArray(), input);
+            cpu.Run();
+            Assert.Equal(expected, cpu.LastOutput);
         }
 
         [Fact]

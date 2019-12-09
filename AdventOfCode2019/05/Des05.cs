@@ -9,7 +9,9 @@ namespace AdventOfCode2019._05
     {
         public static int First(List<int> list, int input)
         {
-            return new OpCodeInterpreter(list.ToArray()).Run(input);
+            var cpu = new OpCodeInterpreter(list.ToArray(), input);
+            cpu.Run();
+            return cpu.LastOutput;
         }
         
         public static List<int> Second(List<int> list, int input)
