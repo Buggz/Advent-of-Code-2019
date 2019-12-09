@@ -7,22 +7,29 @@ namespace AdventOfCode2019._07
 {
     public class OpCodeInterpreter
     {
-        private List<int> _program;
-        public int LastOutput;
-        public int? Input;
+        private readonly Dictionary<long, long> _program;
+        public long LastOutput;
+        public long? Input;
         private int? _phase;
         private int _timesAccessedInput;
 
-        private int _idx;
+        private long _idx;
+
+        public OpCodeInterpreter(long[] program, int? input = null, int? phase = null)
+        {
+            Input = input;
+            _program = program.Select((value, index) => new{Key = (long)index, Value = value}).ToDictionary(o => o.Key, o => o.Value);
+            _phase = phase;
+        }
 
         public OpCodeInterpreter(int[] program, int? input = null, int? phase = null)
         {
             Input = input;
-            _program = program.ToList();
+            _program = program.Select((value, index) => new{Key = (long)index, Value = (long)value}).ToDictionary(o => o.Key, o => o.Value);
             _phase = phase;
         }
 
-        private int GetInput()
+        private long GetInput()
         {
             if (_phase.HasValue && _timesAccessedInput++ == 0)
                 return _phase.Value;
@@ -51,11 +58,11 @@ namespace AdventOfCode2019._07
             HALT = 99
         }
 
-        private int GetValue(int value, int mode)
+        private long GetValue(long index, int mode)
         {
             if (mode == 1)
-                return _program[value];
-            return _program[_program[value]];
+                return _program[index];
+            return _program[_program[index]];
         }
 
         public bool Run()
@@ -63,7 +70,7 @@ namespace AdventOfCode2019._07
             while (true)
             {
                 var instruction = (Instructions)(_program[_idx] % 100);
-                var modes = GetModes(_program[_idx]);
+                var modes = GetModes(_idx);
                 switch (instruction)
                 {
                     case Instructions.Add:
@@ -132,8 +139,10 @@ namespace AdventOfCode2019._07
             }
         }
 
-        public static int[] GetModes(int i)
+        private int[] GetModes(long idx)
         {
+            var i = _program[idx]; 
+            
             return new[]
             {
                 (i / 100) % 10 == 1 ? 1 : 0,

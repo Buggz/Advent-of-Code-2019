@@ -7,16 +7,18 @@ namespace AdventOfCode2019._05
 {
     public class Des05
     {
-        public static int First(List<int> list, int input)
+        public static long First(List<int> list, int input)
         {
-            var cpu = new OpCodeInterpreter(list.ToArray(), input);
+            var cpu = new OpCodeInterpreter(list.Select(x => (long)x).ToArray(), input);
             cpu.Run();
             return cpu.LastOutput;
         }
         
-        public static List<int> Second(List<int> list, int input)
+        public static long Second(List<int> list, int input)
         {
-            return RunOpcodes(list, input);
+            var cpu = new OpCodeInterpreter(list.Select(x => (long)x).ToArray(), input);
+            cpu.Run();
+            return cpu.LastOutput;
         }
         
         public static List<int> RunOpcodes(List<int> list, int input, int? phaseSetting = null)

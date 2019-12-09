@@ -68,7 +68,7 @@ namespace AdventOfCode2019.Tests
             var input = 5;
 
             var output = Des05.Second(_input, input);
-            _testOutputHelper.WriteLine(string.Join(",", output.Select(x => x.ToString())));
+            _testOutputHelper.WriteLine(output.ToString());
         }
         
         [Theory]
@@ -134,10 +134,10 @@ namespace AdventOfCode2019.Tests
         public void Test()
         {
             var list = new List<int> { 3,9,8,9,10,9,4,9,99,-1,8 };
-            var output = Des05.Second(list, 8).Last();
+            var output = Des05.Second(list, 8);
             Assert.Equal(1, output);
             
-            output = Des05.Second(list, 9).Last();
+            output = Des05.Second(list, 9);
             Assert.Equal(0, output);
         }
     }

@@ -7,9 +7,9 @@ namespace AdventOfCode2019._07
 {
     public static class Des07
     {
-        public static int First(int[] opcodeProgram)
+        public static long First(int[] opcodeProgram)
         {
-            var results = new List<int>();
+            var results = new List<long>();
 
             foreach (var permutation in Permutations)
             {
@@ -19,9 +19,9 @@ namespace AdventOfCode2019._07
             return results.Max();
         }
 
-        public static int Second(int[] opcodeProgram)
+        public static long Second(int[] opcodeProgram)
         {
-            var results = new List<int>();
+            var results = new List<long>();
 
             foreach (var permutation in Permutations)
             {
@@ -31,9 +31,9 @@ namespace AdventOfCode2019._07
             return results.Max();
         }
 
-        private static int RunIntCodeComputerFeedback(int[] opcodeProgram, int[] permutation)
+        private static long RunIntCodeComputerFeedback(int[] opcodeProgram, int[] permutation)
         {
-            int output = 0;
+            long output = 0;
             var cpus = new[]
             {
                 new OpCodeInterpreter(opcodeProgram, phase: permutation[0] + 4),
@@ -57,13 +57,13 @@ namespace AdventOfCode2019._07
             return output;
         }
 
-        public static int RunIntCodeComputer(int[] opcodeProgram, int[] permutation)
+        public static long RunIntCodeComputer(int[] opcodeProgram, int[] permutation)
         {
-            int output = 0;
+            long output = 0;
             
             for (var i = 0; i < permutation.Length; i++)
             {
-                var cpu = new OpCodeInterpreter(opcodeProgram, output, permutation[i] - 1);
+                var cpu = new OpCodeInterpreter(opcodeProgram, (int)output, permutation[i] - 1);
                 cpu.Run();
                 output = cpu.LastOutput;
             }

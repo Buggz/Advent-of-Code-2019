@@ -68,17 +68,6 @@ namespace AdventOfCode2019.Tests
             Assert.Equal(65210, output);
         }
         
-        [Theory]
-        [InlineData(1001, 0, 1)]
-        [InlineData(1101, 1, 1)]
-        public void Correctly_Gets_Modes(int input, int expectedMode1, int expectedMode2)
-        {
-            var modes = OpCodeInterpreter.GetModes(input);
-            Assert.Equal(expectedMode1, modes[0]);
-            Assert.Equal(expectedMode2, modes[1]);
-        }
-
-
         private readonly int[] _opcodeProgram = new []
         {
             3, 8, 1001, 8, 10, 8, 105, 1, 0, 0, 21, 34, 55, 68, 93, 106, 187, 268, 349, 430, 99999, 3, 9, 102, 5, 9, 9,
