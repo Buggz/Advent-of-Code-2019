@@ -71,39 +71,6 @@ namespace AdventOfCode2019.Tests
             _testOutputHelper.WriteLine(output.ToString());
         }
         
-        [Theory]
-        [InlineData(1, typeof(Add))]
-        [InlineData(2, typeof(Multiply))]
-        [InlineData(3, typeof(SaveValue))]
-        [InlineData(4, typeof(OutputValue))]
-        public void InstructionParser_Chooses_Correct_Type(int input, Type expectedType)
-        {
-             var actual = Instruction.Parse(new List<int>() { input, 0, 0, 0, 0 });
-             Assert.Equal(expectedType, actual.GetType());
-        }
-
-        [Theory]
-        [InlineData(1, 3)]
-        [InlineData(2, 3)]
-        [InlineData(3, 1)]
-        [InlineData(4, 1)]
-        public void Instructions_Have_The_Correct_Number_Of_Parameters(int input, int expectedCount)
-        {
-            var actual = Instruction.Parse(new List<int>() { input, 0, 0, 0, 0 });
-            Assert.Equal(expectedCount, actual.ParameterCount);
-        }
-
-        [Theory]
-        [InlineData(1001, Modes.Position, Modes.Immediate)]
-        [InlineData(1101, Modes.Immediate, Modes.Immediate)]
-        public void Parameters_Have_Correct_Mode(int input, Modes expectedMode1, Modes expectedMode2)
-        {
-            var actual = Instruction.Parse(new List<int>() { input, 0, 0, 0, 0 });
-            Assert.Equal(expectedMode1, actual.Parameters[0].Mode);
-            Assert.Equal(expectedMode2, actual.Parameters[1].Mode);
-        }
-
-       
         [Fact]
         public void Instruction_Performs_Correctly()
         {

@@ -8,12 +8,16 @@ namespace AdventOfCode2019._07
     public class OpCodeInterpreter
     {
         private readonly Dictionary<long, long> _program;
-        public long LastOutput;
+        public readonly List<long> AllOutputs = new List<long>();
+
+        public long LastOutput => AllOutputs.Last();
+
         public long? Input;
         private int? _phase;
         private int _timesAccessedInput;
 
         private long _idx;
+        private long _relativeBaseOffset;
 
         public OpCodeInterpreter(long[] program, int? input = null, int? phase = null)
         {
@@ -55,14 +59,30 @@ namespace AdventOfCode2019._07
             JIF,
             LT,
             EQ,
+            RBO,
             HALT = 99
         }
 
-        private long GetValue(long index, int mode)
+        private long GetValue(long index, int mode = 1)
         {
-            if (mode == 1)
-                return _program[index];
-            return _program[_program[index]];
+            if (mode == 2)
+                index = GetValue(index) + _relativeBaseOffset;
+
+            if (mode == 0)
+                index = GetValue(index);
+
+            if (!_program.ContainsKey(index))
+                _program.Add(index, 0);
+            
+            return _program[index];
+        }
+
+        private void SetValue(long index, long value)
+        {
+            if (!_program.ContainsKey(index))
+                _program.Add(index, value);
+            else
+                _program[index] = value;
         }
 
         public bool Run()
@@ -71,27 +91,41 @@ namespace AdventOfCode2019._07
             {
                 var instruction = (Instructions)(_program[_idx] % 100);
                 var modes = GetModes(_idx);
+
+                long index, newValue;
                 switch (instruction)
                 {
                     case Instructions.Add:
-                        _program[_program[_idx + 3]] = GetValue(_idx + 1, modes[0]) + GetValue(_idx + 2, modes[1]);
+                        index = GetValue(_idx + 3);
+                        if (modes[2] == 2)
+                            index += _relativeBaseOffset;
+                        newValue = GetValue(_idx + 1, modes[0]) + GetValue(_idx + 2, modes[1]);
+                        SetValue(index, newValue);
                         _idx += 4;
                         break;
                     
                     case Instructions.Multiply:
-                        _program[_program[_idx + 3]] = GetValue(_idx + 1, modes[0]) * GetValue(_idx + 2, modes[1]);
+                        index = GetValue(_idx + 3);
+                        if (modes[2] == 2)
+                            index += _relativeBaseOffset;
+                        newValue = GetValue(_idx + 1, modes[0]) * GetValue(_idx + 2, modes[1]);
+                        SetValue(index, newValue);
                         _idx += 4;
                         break;
                     
                     case Instructions.Input:
                         if (!CanGetInput())
                             return false;
-                        _program[_program[_idx + 1]] = GetInput();
+                        
+                        index = _program[_idx + 1];
+                        if (modes[0] == 2)
+                            index += _relativeBaseOffset;
+                        SetValue(index, GetInput());
                         _idx += 2;
                         break;
                         
                     case Instructions.Output:
-                        LastOutput = GetValue(_idx + 1, modes[0]);
+                        AllOutputs.Add(GetValue(_idx + 1, modes[0]));
                         _idx += 2;
                         break;
                     
@@ -119,18 +153,31 @@ namespace AdventOfCode2019._07
                     
                     case Instructions.LT:
                         if (GetValue(_idx + 1, modes[0]) < GetValue(_idx + 2, modes[1]))
-                            _program[_program[_idx + 3]] = 1;
+                            newValue = 1;
                         else
-                            _program[_program[_idx + 3]] = 0;
+                            newValue = 0;
+                        index = GetValue(_idx + 3);
+                        if (modes[2] == 2)
+                            index += _relativeBaseOffset;
+                        SetValue(index, newValue);
                         _idx += 4;
                         break;
                     
                     case Instructions.EQ:
                         if (GetValue(_idx + 1, modes[0]) == GetValue(_idx + 2, modes[1]))
-                            _program[_program[_idx + 3]] = 1;
+                            newValue = 1;
                         else
-                            _program[_program[_idx + 3]] = 0;
+                            newValue = 0;
+                        index = GetValue(_idx + 3);
+                        if (modes[2] == 2)
+                            index += _relativeBaseOffset;
+                        SetValue(index, newValue);
                         _idx += 4;
+                        break;
+                    
+                    case Instructions.RBO:
+                        _relativeBaseOffset += GetValue(_idx + 1, modes[0]);
+                        _idx += 2;
                         break;
                     
                     case Instructions.HALT:
@@ -141,13 +188,13 @@ namespace AdventOfCode2019._07
 
         private int[] GetModes(long idx)
         {
-            var i = _program[idx]; 
+            var i = (int)_program[idx]; 
             
             return new[]
             {
-                (i / 100) % 10 == 1 ? 1 : 0,
-                (i / 1000) % 10 == 1 ? 1 : 0,
-                (i / 10000) % 10 == 1 ? 1 : 0,
+                (i / 100) % 10,
+                (i / 1000) % 10,
+                (i / 10000) % 10,
             };
         }
     }
